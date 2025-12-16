@@ -53,6 +53,14 @@ public class GUI implements IGUI {
     }
 
     @Override
+    public void showReturnSuccessMessage(boolean success) {
+        System.out.println(
+                success ?
+                        "Book returned successfully." :
+                        "Cannot return the book.");
+    }
+
+    @Override
     public void showWrongOptionMessage() {
         System.out.println("Wrong option. Please try again.");
     }
@@ -69,8 +77,21 @@ public class GUI implements IGUI {
     @Override
     public int readBook() {
         System.out.println("Book ID:");
+        int id = this.scanner.nextInt();
+        this.scanner.nextLine();
+        return id;
+    }
 
-        return this.scanner.nextInt();
+    @Override
+    public String readBookAuthor() {
+        System.out.println("Author: ");
+        return this.scanner.nextLine();
+    }
+
+    @Override
+    public String readBookTitle() {
+        System.out.println("Title: ");
+        return this.scanner.nextLine();
     }
 
 

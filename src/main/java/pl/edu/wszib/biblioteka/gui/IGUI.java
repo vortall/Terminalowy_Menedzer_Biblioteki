@@ -10,8 +10,13 @@ public interface IGUI {
     String showMenuAndReadChoose(Role role);
     void listBooks(List<Book> books);
     void showRentSuccessMessage(boolean success);
+    void showReturnSuccessMessage(boolean success);
+
     void showWrongOptionMessage();
     User readLoginAndPassword();
     int readBook();
+    String readBookAuthor();
+    String readBookTitle();
+
 }
 

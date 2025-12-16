@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.authentication.IAuthenticator;
 import pl.edu.wszib.biblioteka.database.IBookRepository;
 import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
+import pl.edu.wszib.biblioteka.exceptions.CanNotReturnBookEx;
 import pl.edu.wszib.biblioteka.gui.IGUI;
 import pl.edu.wszib.biblioteka.model.User;
 import pl.edu.wszib.biblioteka.model.Role;
@@ -36,6 +37,12 @@ public class Core implements ICore{
                         gui.listBooks(bookRepository.getBooks());
                         break;
                     case "2":
+                        gui.listBooks(bookRepository.getBooksByAuthor(gui.readBookAuthor()));
+                        break;
+                    case "3":
+                        gui.listBooks(bookRepository.getBooksByTitle(gui.readBookTitle()));
+                        break;
+                    case "4":
                         try {
                             bookRepository.rentBook(gui.readBook());
                             gui.showRentSuccessMessage(true);
@@ -43,7 +50,15 @@ public class Core implements ICore{
                             gui.showRentSuccessMessage(false);
                         }
                         break;
-                    case "3":
+                    case "5":
+                        try {
+                            bookRepository.returnBook(gui.readBook());
+                            gui.showReturnSuccessMessage(true);
+                        } catch (CanNotReturnBookEx e) {
+                            gui.showReturnSuccessMessage(false);
+                        }
+                        break;
+                    case "6":
                         return;
                     default:
                         gui.showWrongOptionMessage();
