@@ -18,6 +18,7 @@ public interface IGUI {
     int readBook();
     String readBookAuthor();
     String readBookTitle();
+    Book readNewBook();
 
 }
 

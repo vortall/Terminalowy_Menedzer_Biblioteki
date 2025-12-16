@@ -30,7 +30,7 @@ public class GUI implements IGUI {
             System.out.println("1. List all books");
             System.out.println("2. Add book");
             System.out.println("3. Remove book");
-            System.out.println("4. Edit book");
+            System.out.println("4. Update book");
             System.out.println("5. Exit");
         }
 
@@ -105,5 +105,31 @@ public class GUI implements IGUI {
         return this.scanner.nextLine();
     }
 
+    @Override
+    public Book readNewBook() {
+        System.out.print("ID: ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Title: ");
+        String title = scanner.nextLine();
+
+        System.out.print("Author: ");
+        String author = scanner.nextLine();
+
+        System.out.print("ISBN: ");
+        int isbn = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Release year: ");
+        int year = Integer.parseInt(scanner.nextLine());
+
+        return Book.builder()
+                .book_id(id)
+                .title(title)
+                .author(author)
+                .isbn_number(isbn)
+                .release_year(year)
+                .rent(false)
+                .build();
+    }
 
 }

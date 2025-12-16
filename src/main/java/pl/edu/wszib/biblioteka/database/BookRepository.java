@@ -84,7 +84,32 @@ public class BookRepository implements IBookRepository {
         }
     }
 
+    @Override
+    public void addBook(Book book) {
+        this.books.add(book);
+    }
 
+    @Override
+    public void removeBook(int book_id) {
+        for (Book book : books) {
+            if (book.getBook_id() == book_id) {
+                books.remove(book);
+                return;
+            }
+        }
+    }
 
+    @Override
+    public void updateBook(Book updatedBook) {
+        for (Book book : books) {
+            if (book.getBook_id() == updatedBook.getBook_id()) {
+                book.setTitle(updatedBook.getTitle());
+                book.setAuthor(updatedBook.getAuthor());
+                book.setIsbn_number(updatedBook.getIsbn_number());
+                book.setRelease_year(updatedBook.getRelease_year());
+                return;
+            }
+        }
+    }
 
 }

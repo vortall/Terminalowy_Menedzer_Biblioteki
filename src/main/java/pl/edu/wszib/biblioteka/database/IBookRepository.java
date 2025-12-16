@@ -10,6 +10,7 @@ public interface IBookRepository {
     List<Book> getBooksByTitle(String title);
     void rentBook(int book_id);
     void returnBook(int book_id);
-
-
+    void addBook(Book book);
+    void removeBook(int book_id);
+    void updateBook(Book book);
 }

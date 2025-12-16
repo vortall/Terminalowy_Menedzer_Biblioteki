@@ -1,12 +1,14 @@
 package pl.edu.wszib.biblioteka.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Book {
     private int book_id;
     private String title;

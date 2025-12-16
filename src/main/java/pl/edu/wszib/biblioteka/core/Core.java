@@ -85,14 +85,17 @@ public class Core implements ICore{
                         gui.listBooks(bookRepository.getBooks());
                         break;
                     case "2":
-                        try {
-                            bookRepository.rentBook(gui.readBook());
-                            gui.showRentSuccessMessage(true);
-                        } catch (CanNotRentBookEx e) {
-                            gui.showRentSuccessMessage(false);
-                        }
+                        System.out.println("Add new book");
+                        bookRepository.addBook(gui.readNewBook());
                         break;
                     case "3":
+                        bookRepository.removeBook(gui.readBook());
+                        break;
+                    case "4":
+                        System.out.println("Update book");
+                        bookRepository.updateBook(gui.readNewBook());
+                        break;
+                    case "5":
                         return;
                     default:
                         gui.showWrongOptionMessage();
