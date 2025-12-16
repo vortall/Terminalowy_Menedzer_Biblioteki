@@ -71,6 +71,29 @@ public class GUI implements IGUI {
                         "Cannot return the book.");
     }
 
+    public void showAddingSuccessMessage(boolean success){
+        System.out.println(
+                success ?
+                        "Book added successfully." :
+                        "Cannot add the book.");
+    }
+
+    public void showRemovalSuccessMessage(boolean success){
+        System.out.println(
+                success ?
+                        "Book removed successfully." :
+                        "Cannot remove the book.");
+    }
+
+    public void showUpdateSuccessMessage(boolean success){
+        System.out.println(
+                success ?
+                        "Book updated successfully." :
+                        "Cannot update the book.");
+    }
+
+
+
     @Override
     public void showWrongOptionMessage() {
         System.out.println("Wrong option. Please try again.");

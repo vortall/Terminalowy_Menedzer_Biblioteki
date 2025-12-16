@@ -86,23 +86,26 @@ public class Core implements ICore{
                             try {
                                 System.out.println("Add new book");
                                 bookRepository.addBook(gui.readNewBook());
+                                gui.showAddingSuccessMessage(true);
                             } catch (InvalidBookInputEx e) {
-                                System.out.println("Error adding new book");
+                                gui.showAddingSuccessMessage(false);
                             }
                             break;
                         case "3":
                             try {
                                 bookRepository.removeBook(gui.readBook());
+                                gui.showRemovalSuccessMessage(true);
                             } catch (CanNotFindBookByIDEx e) {
-                                System.out.println("Error removing book");
+                                gui.showRemovalSuccessMessage(false);
                             }
                             break;
                         case "4":
                             try {
                                 System.out.println("Update book");
                                 bookRepository.updateBook(gui.readNewBook());
+                                gui.showUpdateSuccessMessage(true);
                             } catch (InvalidBookInputEx e) {
-                                System.out.println("Error updating book");
+                                gui.showUpdateSuccessMessage(false);
                             }
                             break;
                         case "5":

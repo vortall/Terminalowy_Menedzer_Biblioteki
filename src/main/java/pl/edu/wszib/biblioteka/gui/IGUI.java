@@ -19,6 +19,12 @@ public interface IGUI {
     void showFindTitleFailMessage();
     void showRentSuccessMessage(boolean success);
     void showReturnSuccessMessage(boolean success);
+    void showAddingSuccessMessage(boolean success);
+    void showRemovalSuccessMessage(boolean success);
+    void showUpdateSuccessMessage(boolean success);
     void showWrongOptionMessage();
+
+
+
 }
 
