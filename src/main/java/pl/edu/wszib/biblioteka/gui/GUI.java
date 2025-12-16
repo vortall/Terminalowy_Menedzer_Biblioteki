@@ -119,6 +119,7 @@ public class GUI implements IGUI {
             this.scanner.nextLine();
             return id;
         } catch (InputMismatchException e){
+            this.scanner.nextLine();
             throw new InvalidBookInputEx();
         }
     }
