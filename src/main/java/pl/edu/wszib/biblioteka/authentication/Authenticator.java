@@ -17,7 +17,6 @@ public class Authenticator implements IAuthenticator {
         if (user != null && user.getPassword().equals(DigestUtils.md5Hex(password))) {
             return user;
         }
-        return user;
-
+        return null;
     }
 }
