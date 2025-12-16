@@ -1,10 +1,14 @@
 package pl.edu.wszib.biblioteka.database;
 
+import org.springframework.stereotype.Component;
+import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
 import pl.edu.wszib.biblioteka.model.Book;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Component
 public class BookRepository implements IBookRepository {
     private final List<Book> books = new ArrayList<>();
 
@@ -29,6 +33,8 @@ public class BookRepository implements IBookRepository {
                 return;
             }
         }
+
+        throw new CanNotRentBookEx();
     }
 
     @Override
@@ -42,11 +48,8 @@ public class BookRepository implements IBookRepository {
     }
 
     @Override
-    public void getBooks() {
-        for (Book book : this.books) {
-           System.out.println(book);
-           return;
-        }
+    public List<Book> getBooks() {
+        return books;
     }
 
 
