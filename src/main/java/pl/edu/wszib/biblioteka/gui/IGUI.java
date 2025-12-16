@@ -9,9 +9,10 @@ import java.util.List;
 public interface IGUI {
     String showMenuAndReadChoose(Role role);
     void listBooks(List<Book> books);
+    void showFindAuthorFailMessage();
+    void showFindTitleFailMessage();
     void showRentSuccessMessage(boolean success);
     void showReturnSuccessMessage(boolean success);
-
     void showWrongOptionMessage();
     User readLoginAndPassword();
     int readBook();

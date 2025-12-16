@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.authentication.IAuthenticator;
 import pl.edu.wszib.biblioteka.database.IBookRepository;
+import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByAuthorEx;
+import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByTitleEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotReturnBookEx;
 import pl.edu.wszib.biblioteka.gui.IGUI;
@@ -37,11 +39,19 @@ public class Core implements ICore{
                         gui.listBooks(bookRepository.getBooks());
                         break;
                     case "2":
-                        gui.listBooks(bookRepository.getBooksByAuthor(gui.readBookAuthor()));
+                        try {
+                            gui.listBooks(bookRepository.getBooksByAuthor(gui.readBookAuthor()));
+                        } catch (CanNotFindBookByAuthorEx e) {
+                            gui.showFindAuthorFailMessage();
+                        }
                         break;
                     case "3":
-                        gui.listBooks(bookRepository.getBooksByTitle(gui.readBookTitle()));
-                        break;
+                        try {
+                            gui.listBooks(bookRepository.getBooksByTitle(gui.readBookTitle()));
+                        } catch (CanNotFindBookByTitleEx e) {
+                            gui.showFindTitleFailMessage();
+                        }
+                            break;
                     case "4":
                         try {
                             bookRepository.rentBook(gui.readBook());

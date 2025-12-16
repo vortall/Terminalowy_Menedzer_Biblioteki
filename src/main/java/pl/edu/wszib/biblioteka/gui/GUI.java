@@ -45,6 +45,17 @@ public class GUI implements IGUI {
     }
 
     @Override
+    public void showFindAuthorFailMessage(){
+        System.out.println("No books found for the given author.");
+    }
+
+
+    @Override
+    public void showFindTitleFailMessage(){
+        System.out.println("No books found for the given title.");
+    }
+
+    @Override
     public void showRentSuccessMessage(boolean success) {
         System.out.println(
                 success ?

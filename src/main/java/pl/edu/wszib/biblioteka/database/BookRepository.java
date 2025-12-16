@@ -1,6 +1,8 @@
 package pl.edu.wszib.biblioteka.database;
 
 import org.springframework.stereotype.Component;
+import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByAuthorEx;
+import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByTitleEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
 import pl.edu.wszib.biblioteka.model.Book;
 
@@ -39,6 +41,9 @@ public class BookRepository implements IBookRepository {
                 result.add(book);
             }
         }
+        if (result.isEmpty()) {
+            throw new CanNotFindBookByAuthorEx();
+        }
         return result;
     }
 
@@ -50,6 +55,9 @@ public class BookRepository implements IBookRepository {
             if (book.getTitle().equalsIgnoreCase(title)) {
                 result.add(book);
             }
+        }
+        if (result.isEmpty()) {
+            throw new CanNotFindBookByTitleEx();
         }
         return result;
     }
