@@ -2,10 +2,10 @@ package pl.edu.wszib.biblioteka.database;
 
 import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByAuthorEx;
+import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByIDEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByTitleEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
 import pl.edu.wszib.biblioteka.model.Book;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,6 +97,7 @@ public class BookRepository implements IBookRepository {
                 return;
             }
         }
+        throw new CanNotFindBookByIDEx();
     }
 
     @Override
@@ -111,5 +112,4 @@ public class BookRepository implements IBookRepository {
             }
         }
     }
-
 }

@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.authentication.IAuthenticator;
 import pl.edu.wszib.biblioteka.database.IBookRepository;
-import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByAuthorEx;
-import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByTitleEx;
-import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
-import pl.edu.wszib.biblioteka.exceptions.CanNotReturnBookEx;
+import pl.edu.wszib.biblioteka.exceptions.*;
 import pl.edu.wszib.biblioteka.gui.IGUI;
 import pl.edu.wszib.biblioteka.model.User;
 import pl.edu.wszib.biblioteka.model.Role;
@@ -85,15 +82,27 @@ public class Core implements ICore{
                         gui.listBooks(bookRepository.getBooks());
                         break;
                     case "2":
-                        System.out.println("Add new book");
-                        bookRepository.addBook(gui.readNewBook());
+                        try {
+                            System.out.println("Add new book");
+                            bookRepository.addBook(gui.readNewBook());
+                        } catch (InvalidBookInputEx e) {
+                            System.out.println("Error adding new book");
+                        }
                         break;
                     case "3":
-                        bookRepository.removeBook(gui.readBook());
+                        try {
+                            bookRepository.removeBook(gui.readBook());
+                        } catch (CanNotFindBookByIDEx e) {
+                            System.out.println("Error removing book");
+                        }
                         break;
                     case "4":
-                        System.out.println("Update book");
-                        bookRepository.updateBook(gui.readNewBook());
+                        try {
+                            System.out.println("Update book");
+                            bookRepository.updateBook(gui.readNewBook());
+                        } catch (InvalidBookInputEx e) {
+                            System.out.println("Error updating book");
+                        }
                         break;
                     case "5":
                         return;
@@ -103,6 +112,5 @@ public class Core implements ICore{
                 }
             }
         }
-
     }
 }

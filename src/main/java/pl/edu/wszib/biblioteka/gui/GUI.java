@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.model.Book;
 import pl.edu.wszib.biblioteka.model.User;
 import pl.edu.wszib.biblioteka.model.Role;
+import pl.edu.wszib.biblioteka.exceptions.InvalidBookInputEx;
 
 import java.util.List;
 import java.util.Scanner;
@@ -49,7 +50,6 @@ public class GUI implements IGUI {
         System.out.println("No books found for the given author.");
     }
 
-
     @Override
     public void showFindTitleFailMessage(){
         System.out.println("No books found for the given title.");
@@ -75,6 +75,8 @@ public class GUI implements IGUI {
     public void showWrongOptionMessage() {
         System.out.println("Wrong option. Please try again.");
     }
+
+
 
     @Override
     public User readLoginAndPassword() {
@@ -106,30 +108,34 @@ public class GUI implements IGUI {
     }
 
     @Override
-    public Book readNewBook() {
-        System.out.print("ID: ");
-        int id = Integer.parseInt(scanner.nextLine());
+    public Book readNewBook() throws InvalidBookInputEx {
+        try {
+            System.out.print("ID: ");
+            int id = Integer.parseInt(scanner.nextLine());
 
-        System.out.print("Title: ");
-        String title = scanner.nextLine();
+            System.out.print("Title: ");
+            String title = scanner.nextLine();
 
-        System.out.print("Author: ");
-        String author = scanner.nextLine();
+            System.out.print("Author: ");
+            String author = scanner.nextLine();
 
-        System.out.print("ISBN: ");
-        int isbn = Integer.parseInt(scanner.nextLine());
+            System.out.print("ISBN: ");
+            int isbn = Integer.parseInt(scanner.nextLine());
 
-        System.out.print("Release year: ");
-        int year = Integer.parseInt(scanner.nextLine());
+            System.out.print("Release year: ");
+            int year = Integer.parseInt(scanner.nextLine());
 
-        return Book.builder()
-                .book_id(id)
-                .title(title)
-                .author(author)
-                .isbn_number(isbn)
-                .release_year(year)
-                .rent(false)
-                .build();
+            return Book.builder()
+                    .book_id(id)
+                    .title(title)
+                    .author(author)
+                    .isbn_number(isbn)
+                    .release_year(year)
+                    .rent(false)
+                    .build();
+
+        } catch (NumberFormatException e) {
+            throw new InvalidBookInputEx();
+        }
     }
-
 }
