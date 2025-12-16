@@ -18,97 +18,99 @@ public class Core implements ICore{
 
     @Override
     public void run() {
-        User user = gui.readLoginAndPassword();
-        User authenticatedUser = authenticator.authenticate(
-                user.getUsername(),
-                user.getPassword());
+        User authenticatedUser = null;
+        while (authenticatedUser == null) {
+            User user = gui.readLoginAndPassword();
+            authenticatedUser = authenticator.authenticate(
+                    user.getUsername(),
+                    user.getPassword());
 
-        if (authenticatedUser == null) {
-            gui.showWrongOptionMessage();
-            return;
-        }
+            if (authenticatedUser == null) {
+                gui.showWrongOptionMessage();
+            }
 
-        if (authenticatedUser.getRole() == Role.USER) {
-            while(true) {
+            else if (authenticatedUser.getRole() == Role.USER) {
+                while(true) {
 
-                switch (gui.showMenuAndReadChoose(authenticatedUser.getRole())) {
-                    case "1":
-                        gui.listBooks(bookRepository.getBooks());
-                        break;
-                    case "2":
-                        try {
-                            gui.listBooks(bookRepository.getBooksByAuthor(gui.readBookAuthor()));
-                        } catch (CanNotFindBookByAuthorEx e) {
-                            gui.showFindAuthorFailMessage();
-                        }
-                        break;
-                    case "3":
-                        try {
-                            gui.listBooks(bookRepository.getBooksByTitle(gui.readBookTitle()));
-                        } catch (CanNotFindBookByTitleEx e) {
-                            gui.showFindTitleFailMessage();
-                        }
+                    switch (gui.showMenuAndReadChoose(authenticatedUser.getRole())) {
+                        case "1":
+                            gui.listBooks(bookRepository.getBooks());
                             break;
-                    case "4":
-                        try {
-                            bookRepository.rentBook(gui.readBook());
-                            gui.showRentSuccessMessage(true);
-                        } catch (CanNotRentBookEx e) {
-                            gui.showRentSuccessMessage(false);
-                        }
-                        break;
-                    case "5":
-                        try {
-                            bookRepository.returnBook(gui.readBook());
-                            gui.showReturnSuccessMessage(true);
-                        } catch (CanNotReturnBookEx e) {
-                            gui.showReturnSuccessMessage(false);
-                        }
-                        break;
-                    case "6":
-                        return;
-                    default:
-                        gui.showWrongOptionMessage();
-                        break;
+                        case "2":
+                            try {
+                                gui.listBooks(bookRepository.getBooksByAuthor(gui.readBookAuthor()));
+                            } catch (CanNotFindBookByAuthorEx e) {
+                                gui.showFindAuthorFailMessage();
+                            }
+                            break;
+                        case "3":
+                            try {
+                                gui.listBooks(bookRepository.getBooksByTitle(gui.readBookTitle()));
+                            } catch (CanNotFindBookByTitleEx e) {
+                                gui.showFindTitleFailMessage();
+                            }
+                                break;
+                        case "4":
+                            try {
+                                bookRepository.rentBook(gui.readBook());
+                                gui.showRentSuccessMessage(true);
+                            } catch (CanNotRentBookEx e) {
+                                gui.showRentSuccessMessage(false);
+                            }
+                            break;
+                        case "5":
+                            try {
+                                bookRepository.returnBook(gui.readBook());
+                                gui.showReturnSuccessMessage(true);
+                            } catch (CanNotReturnBookEx e) {
+                                gui.showReturnSuccessMessage(false);
+                            }
+                            break;
+                        case "6":
+                            return;
+                        default:
+                            gui.showWrongOptionMessage();
+                            break;
+                    }
                 }
             }
-        }
 
-        else if (authenticatedUser.getRole() == Role.ADMIN) {
-            while(true) {
+            else if (authenticatedUser.getRole() == Role.ADMIN) {
+                while(true) {
 
-                switch (gui.showMenuAndReadChoose(authenticatedUser.getRole())) {
-                    case "1":
-                        gui.listBooks(bookRepository.getBooks());
-                        break;
-                    case "2":
-                        try {
-                            System.out.println("Add new book");
-                            bookRepository.addBook(gui.readNewBook());
-                        } catch (InvalidBookInputEx e) {
-                            System.out.println("Error adding new book");
-                        }
-                        break;
-                    case "3":
-                        try {
-                            bookRepository.removeBook(gui.readBook());
-                        } catch (CanNotFindBookByIDEx e) {
-                            System.out.println("Error removing book");
-                        }
-                        break;
-                    case "4":
-                        try {
-                            System.out.println("Update book");
-                            bookRepository.updateBook(gui.readNewBook());
-                        } catch (InvalidBookInputEx e) {
-                            System.out.println("Error updating book");
-                        }
-                        break;
-                    case "5":
-                        return;
-                    default:
-                        gui.showWrongOptionMessage();
-                        break;
+                    switch (gui.showMenuAndReadChoose(authenticatedUser.getRole())) {
+                        case "1":
+                            gui.listBooks(bookRepository.getBooks());
+                            break;
+                        case "2":
+                            try {
+                                System.out.println("Add new book");
+                                bookRepository.addBook(gui.readNewBook());
+                            } catch (InvalidBookInputEx e) {
+                                System.out.println("Error adding new book");
+                            }
+                            break;
+                        case "3":
+                            try {
+                                bookRepository.removeBook(gui.readBook());
+                            } catch (CanNotFindBookByIDEx e) {
+                                System.out.println("Error removing book");
+                            }
+                            break;
+                        case "4":
+                            try {
+                                System.out.println("Update book");
+                                bookRepository.updateBook(gui.readNewBook());
+                            } catch (InvalidBookInputEx e) {
+                                System.out.println("Error updating book");
+                            }
+                            break;
+                        case "5":
+                            return;
+                        default:
+                            gui.showWrongOptionMessage();
+                            break;
+                    }
                 }
             }
         }
