@@ -102,8 +102,15 @@ public class BookRepository implements IBookRepository {
 
     @Override
     public void updateBook(Book updatedBook) {
+
+        int id = updatedBook.getBook_id();
+
+        if (id <= 0) {
+            throw new CanNotFindBookByIDEx();
+        }
+
         for (Book book : books) {
-            if (book.getBook_id() == updatedBook.getBook_id()) {
+            if (book.getBook_id() == id) {
                 book.setTitle(updatedBook.getTitle());
                 book.setAuthor(updatedBook.getAuthor());
                 book.setIsbn_number(updatedBook.getIsbn_number());
@@ -111,5 +118,6 @@ public class BookRepository implements IBookRepository {
                 return;
             }
         }
+        throw new CanNotFindBookByIDEx();
     }
 }

@@ -95,7 +95,7 @@ public class Core implements ICore{
                             try {
                                 bookRepository.removeBook(gui.readBook());
                                 gui.showRemovalSuccessMessage(true);
-                            } catch (CanNotFindBookByIDEx e) {
+                            } catch (InvalidBookInputEx | CanNotFindBookByIDEx e) {
                                 gui.showRemovalSuccessMessage(false);
                             }
                             break;
@@ -104,7 +104,7 @@ public class Core implements ICore{
                                 System.out.println("Update book");
                                 bookRepository.updateBook(gui.readNewBook());
                                 gui.showUpdateSuccessMessage(true);
-                            } catch (InvalidBookInputEx e) {
+                            } catch (InvalidBookInputEx | CanNotFindBookByIDEx e) {
                                 gui.showUpdateSuccessMessage(false);
                             }
                             break;

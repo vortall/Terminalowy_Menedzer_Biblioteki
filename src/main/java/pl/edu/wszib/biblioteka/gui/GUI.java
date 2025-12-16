@@ -7,6 +7,7 @@ import pl.edu.wszib.biblioteka.model.User;
 import pl.edu.wszib.biblioteka.model.Role;
 import pl.edu.wszib.biblioteka.exceptions.InvalidBookInputEx;
 
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,7 +18,7 @@ public class GUI implements IGUI {
 
     @Override
     public String showMenuAndReadChoose(Role role) {
-        System.out.println("Welcome to Biblioteka");
+        System.out.println("\nWelcome to Biblioteka");
 
         if (role == Role.USER){
             System.out.println("1. List all books");
@@ -47,56 +48,56 @@ public class GUI implements IGUI {
 
     @Override
     public void showFindAuthorFailMessage(){
-        System.out.println("No books found for the given author.");
+        System.out.println("No books found for the given author.\n");
     }
 
     @Override
     public void showFindTitleFailMessage(){
-        System.out.println("No books found for the given title.");
+        System.out.println("No books found for the given title.\n");
     }
 
     @Override
     public void showRentSuccessMessage(boolean success) {
         System.out.println(
                 success ?
-                        "Book rented successfully." :
-                        "Cannot rent the book.");
+                        "Book rented successfully.\n" :
+                        "Cannot rent the book.\n");
     }
 
     @Override
     public void showReturnSuccessMessage(boolean success) {
         System.out.println(
                 success ?
-                        "Book returned successfully." :
-                        "Cannot return the book.");
+                        "Book returned successfully.\n" :
+                        "Cannot return the book.\n");
     }
 
     public void showAddingSuccessMessage(boolean success){
         System.out.println(
                 success ?
-                        "Book added successfully." :
-                        "Cannot add the book.");
+                        "Book added successfully.\n" :
+                        "Cannot add the book.\n");
     }
 
     public void showRemovalSuccessMessage(boolean success){
         System.out.println(
                 success ?
-                        "Book removed successfully." :
-                        "Cannot remove the book.");
+                        "Book removed successfully.\n" :
+                        "Cannot remove the book.\n");
     }
 
     public void showUpdateSuccessMessage(boolean success){
         System.out.println(
                 success ?
-                        "Book updated successfully." :
-                        "Cannot update the book.");
+                        "Book updated successfully.\n" :
+                        "Cannot update the book.\n");
     }
 
 
 
     @Override
     public void showWrongOptionMessage() {
-        System.out.println("Wrong option. Please try again.");
+        System.out.println("Wrong option. Please try again.\n");
     }
 
 
@@ -111,11 +112,15 @@ public class GUI implements IGUI {
     }
 
     @Override
-    public int readBook() {
+    public int readBook() throws InvalidBookInputEx {
         System.out.println("Book ID:");
-        int id = this.scanner.nextInt();
-        this.scanner.nextLine();
-        return id;
+        try{
+            int id = this.scanner.nextInt();
+            this.scanner.nextLine();
+            return id;
+        } catch (InputMismatchException e){
+            throw new InvalidBookInputEx();
+        }
     }
 
     @Override

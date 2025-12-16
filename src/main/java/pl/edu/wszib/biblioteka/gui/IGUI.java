@@ -10,8 +10,9 @@ import java.util.List;
 public interface IGUI {
     User readLoginAndPassword();
     void listBooks(List<Book> books);
+
     Book readNewBook() throws InvalidBookInputEx;
-    int readBook();
+    int readBook() throws InvalidBookInputEx;
     String readBookAuthor();
     String readBookTitle();
     String showMenuAndReadChoose(Role role);
