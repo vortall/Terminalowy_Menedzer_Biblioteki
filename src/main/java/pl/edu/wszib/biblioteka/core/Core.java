@@ -54,7 +54,7 @@ public class Core implements ICore{
                             try {
                                 bookRepository.rentBook(gui.readBook());
                                 gui.showRentSuccessMessage(true);
-                            } catch (CanNotRentBookEx e) {
+                            } catch (InvalidBookInputEx | CanNotRentBookEx e) {
                                 gui.showRentSuccessMessage(false);
                             }
                             break;
@@ -62,7 +62,7 @@ public class Core implements ICore{
                             try {
                                 bookRepository.returnBook(gui.readBook());
                                 gui.showReturnSuccessMessage(true);
-                            } catch (CanNotReturnBookEx e) {
+                            } catch (InvalidBookInputEx | CanNotRentBookEx e) {
                                 gui.showReturnSuccessMessage(false);
                             }
                             break;
