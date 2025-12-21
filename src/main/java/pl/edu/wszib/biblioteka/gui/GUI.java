@@ -48,56 +48,56 @@ public class GUI implements IGUI {
 
     @Override
     public void showFindAuthorFailMessage(){
-        System.out.println("No books found for the given author.\n");
+        System.out.println("No books found for the given author.");
     }
 
     @Override
     public void showFindTitleFailMessage(){
-        System.out.println("No books found for the given title.\n");
+        System.out.println("No books found for the given title.");
     }
 
     @Override
     public void showRentSuccessMessage(boolean success) {
         System.out.println(
                 success ?
-                        "Book rented successfully.\n" :
-                        "Cannot rent the book.\n");
+                        "Book rented successfully." :
+                        "Cannot rent the book.");
     }
 
     @Override
     public void showReturnSuccessMessage(boolean success) {
         System.out.println(
                 success ?
-                        "Book returned successfully.\n" :
-                        "Cannot return the book.\n");
+                        "Book returned successfully." :
+                        "Cannot return the book.");
     }
 
     public void showAddingSuccessMessage(boolean success){
         System.out.println(
                 success ?
-                        "Book added successfully.\n" :
-                        "Cannot add the book.\n");
+                        "Book added successfully." :
+                        "Cannot add the book.");
     }
 
     public void showRemovalSuccessMessage(boolean success){
         System.out.println(
                 success ?
-                        "Book removed successfully.\n" :
-                        "Cannot remove the book.\n");
+                        "Book removed successfully." :
+                        "Cannot remove the book.");
     }
 
     public void showUpdateSuccessMessage(boolean success){
         System.out.println(
                 success ?
-                        "Book updated successfully.\n" :
-                        "Cannot update the book.\n");
+                        "Book updated successfully." :
+                        "Cannot update the book.");
     }
 
 
 
     @Override
     public void showWrongOptionMessage() {
-        System.out.println("Wrong option. Please try again.\n");
+        System.out.println("Wrong option. Please try again.");
     }
 
 
