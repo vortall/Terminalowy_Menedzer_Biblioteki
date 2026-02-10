@@ -8,14 +8,8 @@ import pl.edu.wszib.biblioteka.model.User;
 import java.util.List;
 
 public interface IGUI {
-    User readLoginAndPassword();
-    void listBooks(List<Book> books);
-
-    Book readNewBook() throws InvalidBookInputEx;
-    int readBook() throws InvalidBookInputEx;
-    String readBookAuthor();
-    String readBookTitle();
     String showMenuAndReadChoose(Role role);
+    void listBooks(List<Book> books);
     void showFindAuthorFailMessage();
     void showFindTitleFailMessage();
     void showRentSuccessMessage(boolean success);
@@ -24,8 +18,9 @@ public interface IGUI {
     void showRemovalSuccessMessage(boolean success);
     void showUpdateSuccessMessage(boolean success);
     void showWrongOptionMessage();
-
-
-
+    User readLoginAndPassword();
+    int readBook() throws InvalidBookInputEx;
+    String readBookAuthor();
+    String readBookTitle();
+    Book readNewBook() throws InvalidBookInputEx;
 }
-

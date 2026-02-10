@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS books (
     rent BOOLEAN DEFAULT FALSE
 );
 
+CREATE TABLE IF NOT EXISTS rentals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    book_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (book_id) REFERENCES books(id)
+);
+
 -- Wstawianie użytkowników
 INSERT INTO users (username, password, role)
 SELECT 'admin', '21232f297a57a5a743894a0e4a801fc3', 'ADMIN'

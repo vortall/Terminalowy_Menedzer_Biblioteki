@@ -82,28 +82,44 @@ public class BookRepository implements IBookRepository {
     }
 
     @Override
-    public void rentBook(int id) {
+    public void rentBook(int bookId, int userId) {
         String checkSql = "SELECT rent FROM books WHERE id = ?";
-        String updateSql = "UPDATE books SET rent = TRUE WHERE id = ?";
+        String updateBookSql = "UPDATE books SET rent = TRUE WHERE id = ?";
+        String insertRentalSql = "INSERT INTO rentals (user_id, book_id) VALUES (?, ?)";
 
-        try (Connection connection = databaseConfig.getConnection();
-             PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+        try (Connection connection = databaseConfig.getConnection()) {
+            connection.setAutoCommit(false);
             
-            checkStmt.setInt(1, id);
-            ResultSet resultSet = checkStmt.executeQuery();
+            try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+                checkStmt.setInt(1, bookId);
+                ResultSet resultSet = checkStmt.executeQuery();
 
-            if (resultSet.next()) {
-                boolean isRented = resultSet.getBoolean("rent");
-                if (isRented) {
+                if (resultSet.next()) {
+                    boolean isRented = resultSet.getBoolean("rent");
+                    if (isRented) {
+                        throw new CanNotRentBookEx();
+                    }
+
+                    try (PreparedStatement updateStmt = connection.prepareStatement(updateBookSql)) {
+                        updateStmt.setInt(1, bookId);
+                        updateStmt.executeUpdate();
+                    }
+
+                    try (PreparedStatement insertStmt = connection.prepareStatement(insertRentalSql)) {
+                        insertStmt.setInt(1, userId);
+                        insertStmt.setInt(2, bookId);
+                        insertStmt.executeUpdate();
+                    }
+                    
+                    connection.commit();
+                } else {
                     throw new CanNotRentBookEx();
                 }
-                
-                try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
-                    updateStmt.setInt(1, id);
-                    updateStmt.executeUpdate();
-                }
-            } else {
-                throw new CanNotRentBookEx();
+            } catch (SQLException | CanNotRentBookEx e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -111,13 +127,30 @@ public class BookRepository implements IBookRepository {
     }
 
     @Override
-    public void returnBook(int id) {
-        String sql = "UPDATE books SET rent = FALSE WHERE id = ?";
-        try (Connection connection = databaseConfig.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+    public void returnBook(int bookId) {
+        String updateBookSql = "UPDATE books SET rent = FALSE WHERE id = ?";
+        String deleteRentalSql = "DELETE FROM rentals WHERE book_id = ?";
+
+        try (Connection connection = databaseConfig.getConnection()) {
+            connection.setAutoCommit(false);
             
-            statement.setInt(1, id);
-            statement.executeUpdate();
+            try {
+                try (PreparedStatement updateStmt = connection.prepareStatement(updateBookSql)) {
+                    updateStmt.setInt(1, bookId);
+                    updateStmt.executeUpdate();
+                }
+                try (PreparedStatement deleteStmt = connection.prepareStatement(deleteRentalSql)) {
+                    deleteStmt.setInt(1, bookId);
+                    deleteStmt.executeUpdate();
+                }
+                
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -178,6 +211,26 @@ public class BookRepository implements IBookRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<Book> getBooksByUserId(int userId) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.* FROM books b JOIN rentals r ON b.id = r.book_id WHERE r.user_id = ?";
+        
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                books.add(mapRowToBook(resultSet));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
     }
 
     private Book mapRowToBook(ResultSet resultSet) throws SQLException {

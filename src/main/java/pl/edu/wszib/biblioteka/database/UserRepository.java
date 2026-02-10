@@ -29,6 +29,7 @@ public class UserRepository implements IUserRepository {
             
             if (resultSet.next()) {
                 return new User(
+                        resultSet.getInt("id"),
                         resultSet.getString("username"),
                         resultSet.getString("password"),
                         Role.valueOf(resultSet.getString("role"))
@@ -50,6 +51,7 @@ public class UserRepository implements IUserRepository {
 
             while (resultSet.next()) {
                 users.add(new User(
+                        resultSet.getInt("id"),
                         resultSet.getString("username"),
                         resultSet.getString("password"),
                         Role.valueOf(resultSet.getString("role"))

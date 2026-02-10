@@ -52,7 +52,7 @@ public class Core implements ICore{
                                 break;
                         case "4":
                             try {
-                                bookRepository.rentBook(gui.readBook());
+                                bookRepository.rentBook(gui.readBook(), authenticatedUser.getId());
                                 gui.showRentSuccessMessage(true);
                             } catch (InvalidBookInputEx | CanNotRentBookEx e) {
                                 gui.showRentSuccessMessage(false);
@@ -67,6 +67,9 @@ public class Core implements ICore{
                             }
                             break;
                         case "6":
+                            gui.listBooks(bookRepository.getBooksByUserId(authenticatedUser.getId()));
+                            break;
+                        case "7":
                             return;
                         default:
                             gui.showWrongOptionMessage();

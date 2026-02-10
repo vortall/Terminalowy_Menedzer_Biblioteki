@@ -26,7 +26,8 @@ public class GUI implements IGUI {
             System.out.println("3. List books by title");
             System.out.println("4. Rent book");
             System.out.println("5. Return book");
-            System.out.println("6. Exit");
+            System.out.println("6. Show my rented books");
+            System.out.println("7. Exit");
         }
         else if (role == Role.ADMIN){
             System.out.println("1. List all books");
@@ -41,8 +42,12 @@ public class GUI implements IGUI {
 
     @Override
     public void listBooks(List<Book> books) {
-        for (Book book : books) {
-            System.out.println(book);
+        if (books.isEmpty()) {
+            System.out.println("No books found.");
+        } else {
+            for (Book book : books) {
+                System.out.println(book);
+            }
         }
     }
 
