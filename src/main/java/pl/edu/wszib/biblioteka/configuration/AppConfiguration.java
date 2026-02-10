@@ -11,7 +11,8 @@ import java.util.Scanner;
         "pl.edu.wszib.biblioteka.authentication",
         "pl.edu.wszib.biblioteka.core",
         "pl.edu.wszib.biblioteka.database",
-        "pl.edu.wszib.biblioteka.gui"
+        "pl.edu.wszib.biblioteka.gui",
+        "pl.edu.wszib.biblioteka.configuration"
 })
 public class AppConfiguration {
 

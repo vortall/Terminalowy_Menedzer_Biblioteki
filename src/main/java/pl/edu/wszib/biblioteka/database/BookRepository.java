@@ -1,123 +1,193 @@
 package pl.edu.wszib.biblioteka.database;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.edu.wszib.biblioteka.configuration.DatabaseConfig;
 import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByAuthorEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByIDEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByTitleEx;
 import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
 import pl.edu.wszib.biblioteka.model.Book;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Component
+@RequiredArgsConstructor
 public class BookRepository implements IBookRepository {
-    private final List<Book> books = new ArrayList<>();
-
-    public BookRepository() {
-        this.books.add(new Book(1, "W pustyni i w puszczy", "Henryk Sienkiewicz", 1001, 1911));
-        this.books.add(new Book(2, "Pan Tadeusz", "Adam Mickiewicz", 1002, 1834));
-        this.books.add(new Book(3, "Lalka", "Bolesław Prus", 1003, 1890));
-        this.books.add(new Book(4, "Krzyżacy", "Henryk Sienkiewicz", 1004, 1900));
-        this.books.add(new Book(5, "Ferdydurke", "Witold Gombrowicz", 1005, 1937));
-        this.books.add(new Book(6, "Solaris", "Stanisław Lem", 1006, 1961));
-        this.books.add(new Book(7, "Dziady", "Adam Mickiewicz", 1007, 1823));
-        this.books.add(new Book(8, "Zbrodnia i kara", "Fiodor Dostojewski", 1008, 1866));
-        this.books.add(new Book(9, "Rok 1984", "George Orwell", 1009, 1949));
-        this.books.add(new Book(10, "Hobbit", "J.R.R. Tolkien", 1010, 1937));
-    }
+    private final DatabaseConfig databaseConfig;
 
     @Override
     public List<Book> getBooks() {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books";
+        try (Connection connection = databaseConfig.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                books.add(mapRowToBook(resultSet));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return books;
     }
 
     @Override
     public List<Book> getBooksByAuthor(String author) {
-        List<Book> result = new ArrayList<>();
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE LOWER(author) = LOWER(?)";
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setString(1, author);
+            ResultSet resultSet = statement.executeQuery();
 
-        for (Book book : this.books) {
-            if (book.getAuthor().equalsIgnoreCase(author)) {
-                result.add(book);
+            while (resultSet.next()) {
+                books.add(mapRowToBook(resultSet));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        if (result.isEmpty()) {
+
+        if (books.isEmpty()) {
             throw new CanNotFindBookByAuthorEx();
         }
-        return result;
+        return books;
     }
 
     @Override
     public List<Book> getBooksByTitle(String title) {
-        List<Book> result = new ArrayList<>();
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE LOWER(title) = LOWER(?)";
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        for (Book book : this.books) {
-            if (book.getTitle().equalsIgnoreCase(title)) {
-                result.add(book);
+            statement.setString(1, title);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                books.add(mapRowToBook(resultSet));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        if (result.isEmpty()) {
+
+        if (books.isEmpty()) {
             throw new CanNotFindBookByTitleEx();
         }
-        return result;
+        return books;
     }
 
     @Override
     public void rentBook(int id) {
-        for (Book book : this.books) {
-            if (book.getBook_id() == id && !book.isRent()) {
-                book.setRent(true);
-                return;
-            }
-        }
+        String checkSql = "SELECT rent FROM books WHERE id = ?";
+        String updateSql = "UPDATE books SET rent = TRUE WHERE id = ?";
 
-        throw new CanNotRentBookEx();
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+            
+            checkStmt.setInt(1, id);
+            ResultSet resultSet = checkStmt.executeQuery();
+
+            if (resultSet.next()) {
+                boolean isRented = resultSet.getBoolean("rent");
+                if (isRented) {
+                    throw new CanNotRentBookEx();
+                }
+                
+                try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+                    updateStmt.setInt(1, id);
+                    updateStmt.executeUpdate();
+                }
+            } else {
+                throw new CanNotRentBookEx();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void returnBook(int id) {
-        for (Book book : this.books) {
-            if (book.getBook_id() == id && book.isRent()) {
-                book.setRent(false);
-                return;
-            }
+        String sql = "UPDATE books SET rent = FALSE WHERE id = ?";
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setInt(1, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void addBook(Book book) {
-        this.books.add(book);
+        String sql = "INSERT INTO books (title, author, isbn, release_year, rent) VALUES (?, ?, ?, ?, ?)";
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setString(1, book.getTitle());
+            statement.setString(2, book.getAuthor());
+            statement.setInt(3, book.getIsbn_number());
+            statement.setInt(4, book.getRelease_year());
+            statement.setBoolean(5, false);
+            
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void removeBook(int book_id) {
-        for (Book book : books) {
-            if (book.getBook_id() == book_id) {
-                books.remove(book);
-                return;
+        String sql = "DELETE FROM books WHERE id = ?";
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setInt(1, book_id);
+            int rowsAffected = statement.executeUpdate();
+            
+            if (rowsAffected == 0) {
+                throw new CanNotFindBookByIDEx();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        throw new CanNotFindBookByIDEx();
     }
 
     @Override
     public void updateBook(Book updatedBook) {
-
-        int id = updatedBook.getBook_id();
-
-        if (id <= 0) {
-            throw new CanNotFindBookByIDEx();
-        }
-
-        for (Book book : books) {
-            if (book.getBook_id() == id) {
-                book.setTitle(updatedBook.getTitle());
-                book.setAuthor(updatedBook.getAuthor());
-                book.setIsbn_number(updatedBook.getIsbn_number());
-                book.setRelease_year(updatedBook.getRelease_year());
-                return;
+        String sql = "UPDATE books SET title = ?, author = ?, isbn = ?, release_year = ? WHERE id = ?";
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setString(1, updatedBook.getTitle());
+            statement.setString(2, updatedBook.getAuthor());
+            statement.setInt(3, updatedBook.getIsbn_number());
+            statement.setInt(4, updatedBook.getRelease_year());
+            statement.setInt(5, updatedBook.getBook_id());
+            
+            int rowsAffected = statement.executeUpdate();
+            
+            if (rowsAffected == 0) {
+                throw new CanNotFindBookByIDEx();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        throw new CanNotFindBookByIDEx();
+    }
+
+    private Book mapRowToBook(ResultSet resultSet) throws SQLException {
+        return new Book(
+                resultSet.getInt("id"),
+                resultSet.getString("title"),
+                resultSet.getString("author"),
+                Integer.parseInt(resultSet.getString("isbn")),
+                resultSet.getInt("release_year"),
+                resultSet.getBoolean("rent")
+        );
     }
 }
