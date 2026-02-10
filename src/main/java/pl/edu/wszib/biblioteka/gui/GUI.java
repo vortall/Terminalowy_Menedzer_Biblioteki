@@ -27,7 +27,8 @@ public class GUI implements IGUI {
             System.out.println("4. Rent book");
             System.out.println("5. Return book");
             System.out.println("6. Show my rented books");
-            System.out.println("7. Exit");
+            System.out.println("7. Show rental history");
+            System.out.println("8. Exit");
         }
         else if (role == Role.ADMIN){
             System.out.println("1. List all books");
@@ -170,6 +171,18 @@ public class GUI implements IGUI {
 
         } catch (NumberFormatException e) {
             throw new InvalidBookInputEx();
+        }
+    }
+
+    @Override
+    public void showRentalHistory(List<String> history) {
+        if (history.isEmpty()) {
+            System.out.println("No rental history found.");
+        } else {
+            System.out.println("Rental History:");
+            for (String entry : history) {
+                System.out.println(entry);
+            }
         }
     }
 }

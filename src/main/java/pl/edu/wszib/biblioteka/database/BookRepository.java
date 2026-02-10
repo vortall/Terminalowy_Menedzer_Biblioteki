@@ -99,7 +99,7 @@ public class BookRepository implements IBookRepository {
                     if (isRented) {
                         throw new CanNotRentBookEx();
                     }
-
+                    
                     try (PreparedStatement updateStmt = connection.prepareStatement(updateBookSql)) {
                         updateStmt.setInt(1, bookId);
                         updateStmt.executeUpdate();
@@ -129,7 +129,7 @@ public class BookRepository implements IBookRepository {
     @Override
     public void returnBook(int bookId) {
         String updateBookSql = "UPDATE books SET rent = FALSE WHERE id = ?";
-        String deleteRentalSql = "DELETE FROM rentals WHERE book_id = ?";
+        String updateRentalSql = "UPDATE rentals SET return_date = CURRENT_TIMESTAMP WHERE book_id = ? AND return_date IS NULL";
 
         try (Connection connection = databaseConfig.getConnection()) {
             connection.setAutoCommit(false);
@@ -139,9 +139,10 @@ public class BookRepository implements IBookRepository {
                     updateStmt.setInt(1, bookId);
                     updateStmt.executeUpdate();
                 }
-                try (PreparedStatement deleteStmt = connection.prepareStatement(deleteRentalSql)) {
-                    deleteStmt.setInt(1, bookId);
-                    deleteStmt.executeUpdate();
+
+                try (PreparedStatement updateRentalStmt = connection.prepareStatement(updateRentalSql)) {
+                    updateRentalStmt.setInt(1, bookId);
+                    updateRentalStmt.executeUpdate();
                 }
                 
                 connection.commit();
@@ -216,7 +217,7 @@ public class BookRepository implements IBookRepository {
     @Override
     public List<Book> getBooksByUserId(int userId) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT b.* FROM books b JOIN rentals r ON b.id = r.book_id WHERE r.user_id = ?";
+        String sql = "SELECT b.* FROM books b JOIN rentals r ON b.id = r.book_id WHERE r.user_id = ? AND r.return_date IS NULL";
         
         try (Connection connection = databaseConfig.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -231,6 +232,33 @@ public class BookRepository implements IBookRepository {
             e.printStackTrace();
         }
         return books;
+    }
+
+    @Override
+    public List<String> getRentalHistory(int userId) {
+        List<String> history = new ArrayList<>();
+        String sql = "SELECT b.title, r.rent_date, r.return_date " +
+                     "FROM rentals r JOIN books b ON r.book_id = b.id " +
+                     "WHERE r.user_id = ? ORDER BY r.rent_date DESC";
+
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String title = resultSet.getString("title");
+                Timestamp rentDate = resultSet.getTimestamp("rent_date");
+                Timestamp returnDate = resultSet.getTimestamp("return_date");
+                
+                String status = (returnDate == null) ? "RENTED" : "RETURNED on " + returnDate;
+                history.add(String.format("'%s' (Rented: %s, Status: %s)", title, rentDate, status));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return history;
     }
 
     private Book mapRowToBook(ResultSet resultSet) throws SQLException {

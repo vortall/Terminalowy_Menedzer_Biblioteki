@@ -14,10 +14,12 @@ CREATE TABLE IF NOT EXISTS books (
     rent BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE IF NOT EXISTS rentals (
+CREATE TABLE rentals (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     book_id INT NOT NULL,
+    rent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_date TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (book_id) REFERENCES books(id)
 );

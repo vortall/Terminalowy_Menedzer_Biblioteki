@@ -70,6 +70,9 @@ public class Core implements ICore{
                             gui.listBooks(bookRepository.getBooksByUserId(authenticatedUser.getId()));
                             break;
                         case "7":
+                            gui.showRentalHistory(bookRepository.getRentalHistory(authenticatedUser.getId()));
+                            break;
+                        case "8":
                             return;
                         default:
                             gui.showWrongOptionMessage();
