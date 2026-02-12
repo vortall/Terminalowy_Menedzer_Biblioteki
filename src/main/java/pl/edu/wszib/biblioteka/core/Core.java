@@ -9,6 +9,8 @@ import pl.edu.wszib.biblioteka.gui.IGUI;
 import pl.edu.wszib.biblioteka.model.User;
 import pl.edu.wszib.biblioteka.model.Role;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class Core implements ICore{
@@ -30,6 +32,9 @@ public class Core implements ICore{
             }
 
             else if (authenticatedUser.getRole() == Role.USER) {
+                List<String> notifications = bookRepository.checkReservations(authenticatedUser.getId());
+                gui.showNotifications(notifications);
+                
                 while(true) {
 
                     switch (gui.showMenuAndReadChoose(authenticatedUser.getRole())) {
@@ -54,8 +59,12 @@ public class Core implements ICore{
                             try {
                                 bookRepository.rentBook(gui.readBook(), authenticatedUser.getId());
                                 gui.showRentSuccessMessage(true);
-                            } catch (InvalidBookInputEx | CanNotRentBookEx e) {
+                            } catch (InvalidBookInputEx e) {
                                 gui.showRentSuccessMessage(false);
+                            } catch (CanNotRentBookEx e) {
+                                System.out.println("Book is already rented or does not exist.");
+                            } catch (BookReservedBySomeoneElseEx e) {
+                                System.out.println("Book is reserved by someone else!");
                             }
                             break;
                         case "5":
@@ -73,6 +82,22 @@ public class Core implements ICore{
                             gui.showRentalHistory(bookRepository.getRentalHistory(authenticatedUser.getId()));
                             break;
                         case "8":
+                            try {
+                                bookRepository.reserveBook(gui.readBook(), authenticatedUser.getId());
+                                gui.showReservationSuccessMessage(true);
+                            } catch (InvalidBookInputEx e) {
+                                gui.showReservationSuccessMessage(false);
+                            } catch (BookNotRentedEx e) {
+                                gui.showReservationFailMessage("Book is available, you can rent it directly.");
+                            } catch (BookAlreadyReservedEx e) {
+                                gui.showReservationFailMessage("You have already reserved this book.");
+                            } catch (BookAlreadyHeldByYouEx e) {
+                                gui.showReservationFailMessage("You already have this book!");
+                            } catch (CanNotFindBookByIDEx e) {
+                                gui.showReservationFailMessage("Book not found.");
+                            }
+                            break;
+                        case "9":
                             return;
                         default:
                             gui.showWrongOptionMessage();

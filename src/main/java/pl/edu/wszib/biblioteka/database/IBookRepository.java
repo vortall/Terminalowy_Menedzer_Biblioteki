@@ -10,9 +10,11 @@ public interface IBookRepository {
     List<Book> getBooksByTitle(String title);
     List<Book> getBooksByUserId(int userId);
     List<String> getRentalHistory(int userId);
+    List<String> checkReservations(int userId);
     void rentBook(int book_id, int user_id);
     void returnBook(int book_id);
     void addBook(Book book);
     void removeBook(int book_id);
     void updateBook(Book book);
+    void reserveBook(int bookId, int userId);
 }

@@ -3,10 +3,7 @@ package pl.edu.wszib.biblioteka.database;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.configuration.DatabaseConfig;
-import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByAuthorEx;
-import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByIDEx;
-import pl.edu.wszib.biblioteka.exceptions.CanNotFindBookByTitleEx;
-import pl.edu.wszib.biblioteka.exceptions.CanNotRentBookEx;
+import pl.edu.wszib.biblioteka.exceptions.*;
 import pl.edu.wszib.biblioteka.model.Book;
 
 import java.sql.*;
@@ -84,38 +81,61 @@ public class BookRepository implements IBookRepository {
     @Override
     public void rentBook(int bookId, int userId) {
         String checkSql = "SELECT rent FROM books WHERE id = ?";
+        String checkReservationsSql = "SELECT user_id FROM reservations WHERE book_id = ? ORDER BY reservation_date ASC LIMIT 1";
+        String deleteReservationSql = "DELETE FROM reservations WHERE book_id = ? AND user_id = ?";
         String updateBookSql = "UPDATE books SET rent = TRUE WHERE id = ?";
         String insertRentalSql = "INSERT INTO rentals (user_id, book_id) VALUES (?, ?)";
 
         try (Connection connection = databaseConfig.getConnection()) {
             connection.setAutoCommit(false);
             
-            try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
-                checkStmt.setInt(1, bookId);
-                ResultSet resultSet = checkStmt.executeQuery();
+            try {
+                try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+                    checkStmt.setInt(1, bookId);
+                    ResultSet resultSet = checkStmt.executeQuery();
 
-                if (resultSet.next()) {
-                    boolean isRented = resultSet.getBoolean("rent");
-                    if (isRented) {
-                        throw new CanNotRentBookEx();
+                    if (resultSet.next()) {
+                        boolean isRented = resultSet.getBoolean("rent");
+                        if (isRented) {
+                            throw new CanNotRentBookEx();
+                        }
+                    } else {
+                        throw new CanNotRentBookEx(); // Książka nie istnieje
                     }
-                    
-                    try (PreparedStatement updateStmt = connection.prepareStatement(updateBookSql)) {
-                        updateStmt.setInt(1, bookId);
-                        updateStmt.executeUpdate();
-                    }
-
-                    try (PreparedStatement insertStmt = connection.prepareStatement(insertRentalSql)) {
-                        insertStmt.setInt(1, userId);
-                        insertStmt.setInt(2, bookId);
-                        insertStmt.executeUpdate();
-                    }
-                    
-                    connection.commit();
-                } else {
-                    throw new CanNotRentBookEx();
                 }
-            } catch (SQLException | CanNotRentBookEx e) {
+
+                try (PreparedStatement resStmt = connection.prepareStatement(checkReservationsSql)) {
+                    resStmt.setInt(1, bookId);
+                    ResultSet resSet = resStmt.executeQuery();
+                    
+                    if (resSet.next()) {
+                        int reservingUserId = resSet.getInt("user_id");
+                        if (reservingUserId != userId) {
+                            // Ktoś inny zarezerwował
+                            throw new BookReservedBySomeoneElseEx();
+                        }
+
+                        try (PreparedStatement delResStmt = connection.prepareStatement(deleteReservationSql)) {
+                            delResStmt.setInt(1, bookId);
+                            delResStmt.setInt(2, userId);
+                            delResStmt.executeUpdate();
+                        }
+                    }
+                }
+
+                try (PreparedStatement updateStmt = connection.prepareStatement(updateBookSql)) {
+                    updateStmt.setInt(1, bookId);
+                    updateStmt.executeUpdate();
+                }
+
+                try (PreparedStatement insertStmt = connection.prepareStatement(insertRentalSql)) {
+                    insertStmt.setInt(1, userId);
+                    insertStmt.setInt(2, bookId);
+                    insertStmt.executeUpdate();
+                }
+                
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
                 connection.rollback();
                 throw e;
             } finally {
@@ -259,6 +279,91 @@ public class BookRepository implements IBookRepository {
             e.printStackTrace();
         }
         return history;
+    }
+
+    @Override
+    public void reserveBook(int bookId, int userId) {
+        String checkRentSql = "SELECT rent FROM books WHERE id = ?";
+        String checkResSql = "SELECT id FROM reservations WHERE book_id = ? AND user_id = ?";
+        String checkHeldSql = "SELECT id FROM rentals WHERE book_id = ? AND user_id = ? AND return_date IS NULL";
+        String insertResSql = "INSERT INTO reservations (user_id, book_id) VALUES (?, ?)";
+
+        try (Connection connection = databaseConfig.getConnection()) {
+            try (PreparedStatement stmt = connection.prepareStatement(checkRentSql)) {
+                stmt.setInt(1, bookId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    if (!rs.getBoolean("rent")) {
+                        throw new BookNotRentedEx();
+                    }
+                } else {
+                    throw new CanNotFindBookByIDEx();
+                }
+            }
+
+            try (PreparedStatement stmt = connection.prepareStatement(checkResSql)) {
+                stmt.setInt(1, bookId);
+                stmt.setInt(2, userId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    throw new BookAlreadyReservedEx();
+                }
+            }
+
+            try (PreparedStatement stmt = connection.prepareStatement(checkHeldSql)) {
+                stmt.setInt(1, bookId);
+                stmt.setInt(2, userId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    throw new BookAlreadyHeldByYouEx();
+                }
+            }
+
+            try (PreparedStatement stmt = connection.prepareStatement(insertResSql)) {
+                stmt.setInt(1, userId);
+                stmt.setInt(2, bookId);
+                stmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<String> checkReservations(int userId) {
+        List<String> notifications = new ArrayList<>();
+        String myReservationsSql = "SELECT b.id, b.title, b.rent FROM reservations r JOIN books b ON r.book_id = b.id WHERE r.user_id = ?";
+        String queueSql = "SELECT user_id FROM reservations WHERE book_id = ? ORDER BY reservation_date ASC LIMIT 1";
+
+        try (Connection connection = databaseConfig.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(myReservationsSql)) {
+            
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int bookId = rs.getInt("id");
+                String title = rs.getString("title");
+                boolean isRented = rs.getBoolean("rent");
+
+                if (!isRented) {
+                    try (PreparedStatement qStmt = connection.prepareStatement(queueSql)) {
+                        qStmt.setInt(1, bookId);
+                        ResultSet qRs = qStmt.executeQuery();
+                        if (qRs.next()) {
+                            int firstUserId = qRs.getInt("user_id");
+                            if (firstUserId == userId) {
+                                notifications.add("Book '" + title + "' is now available for you!");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notifications;
     }
 
     private Book mapRowToBook(ResultSet resultSet) throws SQLException {

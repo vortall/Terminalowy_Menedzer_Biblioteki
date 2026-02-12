@@ -28,7 +28,8 @@ public class GUI implements IGUI {
             System.out.println("5. Return book");
             System.out.println("6. Show my rented books");
             System.out.println("7. Show rental history");
-            System.out.println("8. Exit");
+            System.out.println("8. Reserve book");
+            System.out.println("9. Exit");
         }
         else if (role == Role.ADMIN){
             System.out.println("1. List all books");
@@ -183,6 +184,27 @@ public class GUI implements IGUI {
             for (String entry : history) {
                 System.out.println(entry);
             }
+        }
+    }
+
+    @Override
+    public void showReservationSuccessMessage(boolean success) {
+        System.out.println(success ? "Book reserved successfully." : "Cannot reserve book.");
+    }
+
+    @Override
+    public void showReservationFailMessage(String reason) {
+        System.out.println("Cannot reserve book: " + reason);
+    }
+
+    @Override
+    public void showNotifications(List<String> notifications) {
+        if (!notifications.isEmpty()) {
+            System.out.println("\n--- NOTIFICATIONS ---");
+            for (String note : notifications) {
+                System.out.println(note);
+            }
+            System.out.println("---------------------\n");
         }
     }
 }

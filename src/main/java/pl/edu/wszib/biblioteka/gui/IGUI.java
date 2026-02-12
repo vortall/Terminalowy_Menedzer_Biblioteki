@@ -19,6 +19,9 @@ public interface IGUI {
     void showUpdateSuccessMessage(boolean success);
     void showWrongOptionMessage();
     void showRentalHistory(List<String> history);
+    void showReservationSuccessMessage(boolean success);
+    void showReservationFailMessage(String reason);
+    void showNotifications(List<String> notifications);
     User readLoginAndPassword();
     int readBook() throws InvalidBookInputEx;
     String readBookAuthor();
