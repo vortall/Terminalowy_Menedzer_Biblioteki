@@ -3,6 +3,7 @@ package pl.edu.wszib.biblioteka.gui;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.model.Book;
+import pl.edu.wszib.biblioteka.model.LibraryStatistics;
 import pl.edu.wszib.biblioteka.model.User;
 import pl.edu.wszib.biblioteka.model.Role;
 import pl.edu.wszib.biblioteka.exceptions.InvalidBookInputEx;
@@ -36,7 +37,8 @@ public class GUI implements IGUI {
             System.out.println("2. Add book");
             System.out.println("3. Remove book");
             System.out.println("4. Update book");
-            System.out.println("5. Exit");
+            System.out.println("5. Show statistics");
+            System.out.println("6. Exit");
         }
 
         return this.scanner.nextLine();
@@ -206,5 +208,23 @@ public class GUI implements IGUI {
             }
             System.out.println("---------------------\n");
         }
+    }
+
+    @Override
+    public void showStatistics(LibraryStatistics stats) {
+        System.out.println("\n--- LIBRARY STATISTICS ---");
+        System.out.println("Total books: " + stats.getTotalBooks());
+        System.out.println("Currently rented books: " + stats.getRentedBooks());
+        System.out.println("Active users (with rented books): " + stats.getActiveUsersCount());
+        
+        System.out.println("\nMost Popular Books:");
+        if (stats.getMostPopularBooks().isEmpty()) {
+            System.out.println("- No data");
+        } else {
+            for (String book : stats.getMostPopularBooks()) {
+                System.out.println("- " + book);
+            }
+        }
+        System.out.println("--------------------------\n");
     }
 }

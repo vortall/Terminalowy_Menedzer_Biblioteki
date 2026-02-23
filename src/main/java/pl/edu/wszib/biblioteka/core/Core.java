@@ -140,6 +140,9 @@ public class Core implements ICore{
                             }
                             break;
                         case "5":
+                            gui.showStatistics(bookRepository.getStatistics());
+                            break;
+                        case "6":
                             return;
                         default:
                             gui.showWrongOptionMessage();

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import pl.edu.wszib.biblioteka.configuration.DatabaseConfig;
 import pl.edu.wszib.biblioteka.exceptions.*;
 import pl.edu.wszib.biblioteka.model.Book;
+import pl.edu.wszib.biblioteka.model.LibraryStatistics;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class BookRepository implements IBookRepository {
                             throw new CanNotRentBookEx();
                         }
                     } else {
-                        throw new CanNotRentBookEx(); // Książka nie istnieje
+                        throw new CanNotRentBookEx();
                     }
                 }
 
@@ -111,7 +112,6 @@ public class BookRepository implements IBookRepository {
                     if (resSet.next()) {
                         int reservingUserId = resSet.getInt("user_id");
                         if (reservingUserId != userId) {
-                            // Ktoś inny zarezerwował
                             throw new BookReservedBySomeoneElseEx();
                         }
 
@@ -309,7 +309,7 @@ public class BookRepository implements IBookRepository {
                     throw new BookAlreadyReservedEx();
                 }
             }
-
+            
             try (PreparedStatement stmt = connection.prepareStatement(checkHeldSql)) {
                 stmt.setInt(1, bookId);
                 stmt.setInt(2, userId);
@@ -364,6 +364,52 @@ public class BookRepository implements IBookRepository {
             e.printStackTrace();
         }
         return notifications;
+    }
+
+    @Override
+    public LibraryStatistics getStatistics() {
+        int totalBooks = 0;
+        int rentedBooks = 0;
+        List<String> mostPopular = new ArrayList<>();
+        int activeUsersCount = 0;
+
+        try (Connection connection = databaseConfig.getConnection()) {
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM books")) {
+                if (rs.next()) totalBooks = rs.getInt(1);
+            }
+
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM books WHERE rent = TRUE")) {
+                if (rs.next()) rentedBooks = rs.getInt(1);
+            }
+
+            String popularSql = "SELECT b.title, COUNT(r.id) as count FROM rentals r JOIN books b ON r.book_id = b.id GROUP BY b.title ORDER BY count DESC LIMIT 5";
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(popularSql)) {
+                while (rs.next()) {
+                    mostPopular.add(rs.getString("title") + " (" + rs.getInt("count") + " rentals)");
+                }
+            }
+
+            String activeSql = "SELECT COUNT(DISTINCT user_id) FROM rentals WHERE return_date IS NULL";
+            try (Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(activeSql)) {
+                if (rs.next()) {
+                    activeUsersCount = rs.getInt(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return LibraryStatistics.builder()
+                .totalBooks(totalBooks)
+                .rentedBooks(rentedBooks)
+                .mostPopularBooks(mostPopular)
+                .activeUsersCount(activeUsersCount)
+                .build();
     }
 
     private Book mapRowToBook(ResultSet resultSet) throws SQLException {
