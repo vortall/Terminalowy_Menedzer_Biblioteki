@@ -1,16 +1,16 @@
 # Terminalowy Menedżer Biblioteki z SQL
 
-Aplikacja konsolowa do zarządzania biblioteką, wykorzystująca bazę danych H2 oraz JDBC. Projekt zrealizowany w ramach zadania edukacyjnego.
+Aplikacja konsolowa do zarządzania biblioteką, wykorzystująca bazę danych H2 oraz JDBC.
 
 ## Funkcjonalności
 
-### Podstawowe (z Zadania 1)
+### Podstawowe 
 *   Logowanie użytkowników (USER / ADMIN).
 *   Przeglądanie listy książek.
 *   Wyszukiwanie książek po tytule i autorze.
 *   Dodawanie, usuwanie i edycja książek (tylko ADMIN).
 
-### Nowe funkcjonalności (z Zadania 3)
+### Nowe funkcjonalności
 1.  **System wypożyczeń:**
     *   Użytkownik może wypożyczyć książkę.
     *   Użytkownik widzi listę swoich aktualnie wypożyczonych książek.
