@@ -148,9 +148,6 @@ public class GUI implements IGUI {
     @Override
     public Book readNewBook() throws InvalidBookInputEx {
         try {
-            System.out.print("ID: ");
-            int id = Integer.parseInt(scanner.nextLine());
-
             System.out.print("Title: ");
             String title = scanner.nextLine();
 
@@ -164,7 +161,7 @@ public class GUI implements IGUI {
             int year = Integer.parseInt(scanner.nextLine());
 
             return Book.builder()
-                    .book_id(id)
+                    .book_id(0) // ID zostanie nadane przez bazę
                     .title(title)
                     .author(author)
                     .isbn_number(isbn)
